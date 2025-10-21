@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Free Fire Max Sensi Store</title>
+<style>
+  :root{font-family:Inter, system-ui, Arial; --accent:#1f8ef1; --muted:#666;}
+  body{margin:0;background:#f4f6fb;color:#111;display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .wrap{width:1000px;max-width:98%;background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.08);overflow:hidden}
+  header{padding:18px 26px;border-bottom:1px solid #eef2f7;display:flex;align-items:center;justify-content:space-between}
+  header h1{margin:0;font-size:18px}
+  main{display:flex;min-height:600px}
+  .panel{flex:1;padding:22px}
+  .left{border-right:1px solid #f0f3f8;background:linear-gradient(180deg,#ffffff,#fbfdff)}
+  .login-card{max-width:420px;margin:30px auto;padding:22px;border-radius:10px;border:1px solid #eef2f7;background:#fff}
+  input,select,button{font:inherit}
+  label{display:block;margin:10px 0 6px;color:var(--muted);font-size:13px}
+  input[type="text"],input[type="password"],select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8}
+  button{padding:10px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+  .muted{color:var(--muted);font-size:13px}
+  .center{display:flex;align-items:center;justify-content:center}
+  .sensi-btn{display:block;margin:14px auto;padding:16px 22px;background:#0b74d1;color:#fff;border-radius:12px;font-weight:700;cursor:pointer;border:0}
+  .company-list{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .company{padding:10px 14px;border-radius:10px;border:1px solid #e8eef9;cursor:pointer}
+  .company.active{background:#e9f5ff;border-color:#bfe6ff}
+  .models{margin-top:12px}
+  .search{display:flex;gap:8px;align-items:center}
+  .search input{flex:1}
+  .model-item{padding:10px;border-radius:8px;border:1px solid #eef4fb;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+  .cart{position:relative}
+  .cart-badge{position:absolute;top:-8px;right:-8px;background:#ff5252;color:#fff;border-radius:50%;padding:4px 8px;font-size:12px}
+  .cart-list{border-top:1px dashed #eef2f7;margin-top:8px;padding-top:8px}
+  .btn-ghost{background:transparent;color:var(--accent);border:1px solid #d6eaff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .req-card{padding:10px;border-radius:8px;border:1px solid #f0f3f8;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+  .sensi-values{background:#fbfdff;padding:12px;border-radius:8px;border:1px solid #eef6ff;margin-top:12px}
+  footer{padding:12px 20px;border-top:1px solid #f0f3f8;text-align:center;font-size:13px;color:var(--muted)}
+  .tiny{font-size:12px;color:var(--muted)}
+  .hidden{display:none}
+  .flex{display:flex;gap:10px;align-items:center}
+  .pill{background:#f0f6ff;padding:6px 10px;border-radius:999px;border:1px solid #e6f0ff;font-weight:600}
+  .accept{background:#22c55e;color:#fff;padding:8px;border-radius:8px;border:0;cursor:pointer}
+  .reject{background:#ff5252;color:#fff;padding:8px;border-radius:8px;border:0;cursor:pointer}
+  .modal{position:fixed;inset:0;background:rgba(5,10,20,.35);display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;padding:18px;border-radius:12px;max-width:480px;width:96%}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  @media (max-width:900px){main{flex-direction:column}.left{border-right:none;border-bottom:1px solid #f0f3f8}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <h1>Free Fire Max — Sensi Store</h1>
+    <div class="flex">
+      <div class="pill" id="currentUserLabel">Not logged</div>
+      <div style="position:relative">
+        <button class="btn-ghost cart" id="openCartBtn">Cart 🛒 <span class="cart-badge hidden" id="cartBadge">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel left" id="leftPanel">
+      <!-- Login / Home area -->
+      <div id="loginView" class="login-card">
+        <h2>Login</h2>
+        <p class="muted">Select account type: <strong>PRO PLAYER</strong> (visible). Developer login is hidden.</p>
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="Enter username (e.g. PRO_PLAYER)">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="Enter password">
+        <div style="margin-top:12px;display:flex;gap:10px">
+          <button id="loginBtn">Login</button>
+          <button class="btn-ghost" id="guestBtn">Continue as Guest</button>
+        </div>
+        <p class="tiny" style="margin-top:10px">Tip: Developer code exists but is not mentioned on this page.</p>
+      </div>
+
+      <div id="homeView" class="hidden">
+        <h2>Welcome</h2>
+        <p class="muted" id="welcomeText"></p>
+        <button class="sensi-btn" id="openSensi">SENSI</button>
+
+        <div id="postSensiArea" class="hidden">
+          <h3>Choose Mobile Company</h3>
+          <div class="company-list" id="companyList"></div>
+
+          <div class="models hidden" id="modelsArea">
+            <div class="search">
+              <input type="text" id="modelSearch" placeholder="Search model...">
+              <button class="btn-ghost" id="clearSearch">Clear</button>
+            </div>
+            <div id="modelsList"></div>
+          </div>
+        </div>
+
+        <div id="userRequestsArea" class="hidden">
+          <h3>Your Requests</h3>
+          <div id="myRequests"></div>
+        </div>
+
+        <div id="sensiResultArea" class="hidden">
+          <h3>FREE FIRE SENSITY (Approved)</h3>
+          <div class="sensi-values" id="sensiValues"></div>
+        </div>
+
+      </div>
+
+      <div id="devView" class="hidden">
+        <h2>Developer Panel</h2>
+        <p class="muted">Requests from users will appear here.</p>
+        <div id="devRequests"></div>
+      </div>
+    </div>
+
+    <div class="panel right" id="rightPanel">
+      <h3>How it works</h3>
+      <ol>
+        <li>Login as a normal user (PRO PLAYER shown) or developer (hidden: use code).</li>
+        <li>Click <strong>SENSI</strong> → select company → search & choose model → Add to cart / Purchase.</li>
+        <li>Purchase → fill Name, Last name, In-game UID → <strong>Send Request</strong>.</li>
+        <li>Developer accepts/rejects requests. Only after accepted will the user see the sensitivity values.</li>
+      </ol>
+
+      <div style="margin-top:18px">
+        <h4>Cart</h4>
+        <div id="cartArea">
+          <p class="muted">Cart is empty.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:18px">
+        <h4>Debug / Info</h4>
+        <p class="tiny">LocalStorage keys used: <code>ff_users</code>, <code>ff_requests</code>, <code>ff_cart</code>, <code>ff_approved</code></p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    Built for Free Fire Max sensitivity requests • Developer code: <span class="tiny">FF999</span> (hidden on login)
+  </footer>
+</div>
+
+<!-- Modal area -->
+<div id="modalRoot" class="hidden"></div>
+
+<script>
+/* ======= DATA ======= */
+const DATA = {
+  companies: {
+    "Samsung": ["Galaxy S22", "Galaxy S21", "Galaxy A53", "Galaxy M33"],
+    "Xiaomi": ["Redmi Note 12", "Redmi 11", "Mi 11 Lite", "POCO X5"],
+    "OnePlus": ["OnePlus 9", "OnePlus Nord 2", "OnePlus 11"],
+    "Realme": ["Realme 11", "Realme 10 Pro", "Realme Narzo 50"],
+    "OPPO": ["OPPO Reno8", "OPPO A57", "OPPO F21"],
+    "Vivo": ["Vivo V27", "Vivo Y22", "Vivo X80"],
+    "iPhone": ["iPhone 13", "iPhone 12", "iPhone SE (2022)"],
+    "Infinix": ["Hot 30", "Note 12"]
+  },
+  // Best sensitivity presets (example sensible values)
+  sensiPresets: {
+    default: { overall: "90 / 90", ADS: "180", general: "Horizontal:90 Vertical:90", dpi: "400" },
+    "Galaxy S22": { overall: "88 / 92", ADS: "175", note: "Good balance for Samsung AMOLED" },
+    "Galaxy S21": { overall: "87 / 91", ADS: "170", note: "Balanced for 120Hz" },
+    "Redmi Note 12": { overall: "92 / 92", ADS: "185", note: "Higher for touch responsiveness" },
+    "POCO X5": { overall: "94 / 95", ADS: "190" },
+    "iPhone 13": { overall: "85 / 85", ADS: "165" },
+    "OnePlus 11": { overall: "90 / 93", ADS: "180" }
+    // fallback uses default
+  }
+};
+
+/* ======= Storage helpers ======= */
+function lsGet(key, fallback){ try{ const v = localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){return fallback} }
+function lsSet(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+/* init storage */
+if(!lsGet('ff_users', null)) lsSet('ff_users', {}); // username -> {pass, approved, approvedSensi}
+if(!lsGet('ff_requests', null)) lsSet('ff_requests', []);
+if(!lsGet('ff_cart', null)) lsSet('ff_cart', []);
+
+/* ======= UI refs ======= */
+const loginView = document.getElementById('loginView');
+const homeView = document.getElementById('homeView');
+const devView = document.getElementById('devView');
+const leftPanel = document.getElementById('leftPanel');
+const welcomeText = document.getElementById('welcomeText');
+const currentUserLabel = document.getElementById('currentUserLabel');
+
+const openSensiBtn = document.getElementById('openSensi');
+const postSensiArea = document.getElementById('postSensiArea');
+const companyListEl = document.getElementById('companyList');
+const modelsArea = document.getElementById('modelsArea');
+const modelsList = document.getElementById('modelsList');
+const modelSearch = document.getElementById('modelSearch');
+
+const openCartBtn = document.getElementById('openCartBtn');
+const cartArea = document.getElementById('cartArea');
+const cartBadge = document.getElementById('cartBadge');
+
+const myRequestsEl = document.getElementById('myRequests');
+const userRequestsArea = document.getElementById('userRequestsArea');
+const sensiResultArea = document.getElementById('sensiResultArea');
+const sensiValuesEl = document.getElementById('sensiValues');
+
+const devRequestsEl = document.getElementById('devRequests');
+
+const modalRoot = document.getElementById('modalRoot');
+
+/* ======= State ======= */
+let currentUser = null; // {username, role: 'user'|'dev'}
+let selectedCompany = null;
+let selectedModel = null;
+
+/* ======= Auth ======= */
+function showLogin(){
+  loginView.classList.remove('hidden');
+  homeView.classList.add('hidden');
+  devView.classList.add('hidden');
+  currentUserLabel.textContent = 'Not logged';
+}
+
+function showHome(){
+  loginView.classList.add('hidden');
+  devView.classList.add('hidden');
+  homeView.classList.remove('hidden');
+  currentUserLabel.textContent = currentUser.username + (currentUser.role==='dev'?' (DEV)':'');
+  welcomeText.textContent = 'Logged in as ' + currentUser.username + (currentUser.role==='dev'?' (Developer)':' (PRO PLAYER)');
+  // show sensi area only when SENSI clicked
+  postSensiArea.classList.add('hidden');
+  modelsArea.classList.add('hidden');
+  userRequestsArea.classList.remove('hidden');
+  renderCart();
+  renderUserRequests();
+  renderSensiIfApproved();
+}
+
+function showDev(){
+  loginView.classList.add('hidden');
+  homeView.classList.add('hidden');
+  devView.classList.remove('hidden');
+  currentUserLabel.textContent = currentUser.username + ' (DEV)';
+  renderDevRequests();
+}
+
+/* login logic */
+document.getElementById('loginBtn').addEventListener('click', ()=>{
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if(!u || !p){ alert('Enter username and password'); return; }
+
+  // Developer code check: user provided "FF999" => dev login (but we do not display anywhere on login page)
+  if(u === 'FF999' && p === 'FF999'){
+    currentUser = { username: 'FF999', role: 'dev' };
+    showDev();
+    return;
+  }
+
+  // Normal user login or create
+  const users = lsGet('ff_users', {});
+  if(!users[u]){ // auto-create
+    users[u] = { pass: p, approved: false, approvedSensi: null };
+    lsSet('ff_users', users);
+  } else {
+    if(users[u].pass !== p){ alert('Wrong password'); return; }
+  }
+  currentUser = { username: u, role: 'user' };
+  showHome();
+});
+
+document.getElementById('guestBtn').addEventListener('click', ()=>{
+  currentUser = { username: 'Guest_' + Math.floor(Math.random()*10000), role: 'user' };
+  // create guest user
+  const users = lsGet('ff_users', {});
+  users[currentUser.username] = { pass: '', approved: false, approvedSensi: null };
+  lsSet('ff_users', users);
+  showHome();
+});
+
+/* ======= Sensi flow ======= */
+openSensiBtn.addEventListener('click', ()=>{
+  postSensiArea.classList.remove('hidden');
+  renderCompanies();
+});
+
+function renderCompanies(){
+  companyListEl.innerHTML = '';
+  Object.keys(DATA.companies).forEach(comp => {
+    const btn = document.createElement('div');
+    btn.className = 'company';
+    btn.textContent = comp;
+    btn.addEventListener('click', ()=> {
+      document.querySelectorAll('.company').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCompany = comp;
+      renderModels(comp);
+    });
+    companyListEl.appendChild(btn);
+  });
+}
+
+function renderModels(company){
+  modelsArea.classList.remove('hidden');
+  modelSearch.value = '';
+  const models = DATA.companies[company] || [];
+  modelsList.innerHTML = '';
+  models.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'model-item';
+    card.innerHTML = `<div><strong>${m}</strong><div class="muted" style="font-size:13px">${company}</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" data-model="${m}" data-company="${company}">Add to Cart</button>
+        <button class="sensi-btn" data-model="${m}" data-company="${company}">Purchase Now</button>
+      </div>`;
+    modelsList.appendChild(card);
+  });
+
+  // add handlers
+  modelsList.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', (e)=>{
+      const model = b.getAttribute('data-model');
+      const company = b.getAttribute('data-company');
+      if(b.textContent.includes('Add')){
+        addToCart({company, model});
+      } else {
+        purchaseNow({company, model});
+      }
+    });
+  });
+}
+
+/* search */
+modelSearch.addEventListener('input', ()=>{
+  const q = modelSearch.value.trim().toLowerCase();
+  const nodes = Array.from(modelsList.children);
+  nodes.forEach(n=>{
+    const text = n.textContent.toLowerCase();
+    n.style.display = text.includes(q)?'flex':'none';
+  });
+});
+document.getElementById('clearSearch').addEventListener('click', ()=>{ modelSearch.value=''; modelSearch.dispatchEvent(new Event('input')); });
+
+/* ======= CART ======= */
+function getCart(){ return lsGet('ff_cart', []); }
+function setCart(v){ lsSet('ff_cart', v); }
+
+function addToCart(item){
+  const cart = getCart();
+  cart.push(item);
+  setCart(cart);
+  renderCart();
+  alert(item.model + ' added to cart');
+}
+
+function renderCart(){
+  const cart = getCart();
+  cartArea.innerHTML = '';
+  if(!cart.length){ cartArea.innerHTML = '<p class="muted">Cart is empty.</p>'; cartBadge.classList.add('hidden'); return; }
+  cartBadge.classList.remove('hidden');
+  cartBadge.textContent = cart.length;
+  const list = document.createElement('div');
+  list.className = 'cart-list';
+  cart.forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.className = 'req-card';
+    row.innerHTML = `<div><strong>${it.model}</strong><div class="muted">${it.company}</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" data-idx="${idx}">Remove</button>
+      </div>`;
+    list.appendChild(row);
+  });
+  const cont = document.createElement('div');
+  cont.style.marginTop = '12px';
+  cont.innerHTML = `<button id="continueBtn">Continue</button>`;
+  cartArea.appendChild(list);
+  cartArea.appendChild(cont);
+
+  // remove handlers
+  list.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=> {
+      const idx = +b.getAttribute('data-idx');
+      cart.splice(idx,1);
+      setCart(cart);
+      renderCart();
+    });
+  });
+  document.getElementById('continueBtn').addEventListener('click', ()=> {
+    // show purchase modal for first item
+    if(cart.length) purchaseNow(cart[0]);
+  });
+}
+
+openCartBtn.addEventListener('click', ()=>{
+  // scroll to cart area (right panel)
+  const r = document.getElementById('rightPanel');
+  r.scrollIntoView({behavior:'smooth'});
+});
+
+/* ======= Purchase Flow ======= */
+function purchaseNow({company, model}){
+  selectedModel = {company, model};
+  showPurchaseModal(selectedModel);
+}
+
+function showPurchaseModal(item){
+  modalRoot.innerHTML = '';
+  modalRoot.classList.remove('hidden');
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="card">
+    <div class="topbar"><h3>Purchase ${item.model}</h3><button id="closeModal" class="btn-ghost">Close</button></div>
+    <p class="muted">Fill details to send a request to developer. When developer accepts, you will see the sensitivity on your Home page.</p>
+    <label>First name</label><input id="pfname" type="text">
+    <label>Last name</label><input id="plname" type="text">
+    <label>In-game UID</label><input id="puid" type="text">
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+      <button id="sendReq" class="sensi-btn">Send Request</button>
+    </div>
+  </div>`;
+  modalRoot.appendChild(m);
+
+  document.getElementById('closeModal').addEventListener('click', ()=>{ modalRoot.classList.add('hidden'); modalRoot.innerHTML=''; });
+  document.getElementById('sendReq').addEventListener('click', ()=>{
+    const fn = document.getElementById('pfname').value.trim();
+    const ln = document.getElementById('plname').value.trim();
+    const uid = document.getElementById('puid').value.trim();
+    if(!fn||!ln||!uid){ alert('Fill all fields'); return; }
+    // create request
+    const reqs = lsGet('ff_requests', []);
+    const id = 'R' + Date.now();
+    const req = { id, user: currentUser.username, firstName:fn, lastName:ln, uid, company:item.company, model:item.model, status:'pending', createdAt: new Date().toISOString() };
+    reqs.push(req);
+    lsSet('ff_requests', reqs);
+    // also remove from cart first occurrence of this model if present
+    let cart = getCart();
+    const idx = cart.findIndex(c => c.model === item.model && c.company === item.company);
+    if(idx>=0){ cart.splice(idx,1); setCart(cart); }
+    alert('Request sent to developer. Wait for acceptance.');
+    modalRoot.classList.add('hidden'); modalRoot.innerHTML='';
+    renderCart();
+    renderUserRequests();
+    if(currentUser.role === 'dev') renderDevRequests();
+  });
+}
+
+/* ======= User Requests & Approved Sensi ======= */
+function renderUserRequests(){
+  const reqs = lsGet('ff_requests', []);
+  const mine = reqs.filter(r => r.user === currentUser.username);
+  myRequestsEl.innerHTML = '';
+  if(!mine.length) myRequestsEl.innerHTML = '<p class="muted">No requests yet.</p>';
+  mine.forEach(r=>{
+    const div = document.createElement('div');
+    div.className = 'req-card';
+    div.innerHTML = `<div>
+      <strong>${r.model}</strong>
+      <div class="muted">Status: ${r.status}</div>
+      <div class="tiny muted">UID: ${r.uid} • ${new Date(r.createdAt).toLocaleString()}</div>
+    </div>
+    <div></div>`;
+    myRequestsEl.appendChild(div);
+  });
+  // show or hide the entire block
+  userRequestsArea.style.display = (currentUser && currentUser.role==='user')?'block':'none';
+}
+
+function renderSensiIfApproved(){
+  const users = lsGet('ff_users', {});
+  const u = users[currentUser.username];
+  if(u && u.approved && u.approvedSensi){
+    sensiResultArea.classList.remove('hidden');
+    const s = u.approvedSensi;
+    sensiValuesEl.innerHTML = '';
+    // s may have fields; present nicely
+    for(const k in s){
+      const p = document.createElement('div');
+      p.innerHTML = `<strong>${k}:</strong> <span class="muted">${s[k]}</span>`;
+      sensiValuesEl.appendChild(p);
+    }
+  } else {
+    sensiResultArea.classList.add('hidden');
+  }
+}
+
+/* ======= Developer Panel ======= */
+function renderDevRequests(){
+  const reqs = lsGet('ff_requests', []);
+  devRequestsEl.innerHTML = '';
+  if(!reqs.length) devRequestsEl.innerHTML = '<p class="muted">No requests.</p>';
+  reqs.slice().reverse().forEach(r => {
+    const el = document.createElement('div');
+    el.className = 'req-card';
+    el.innerHTML = `<div>
+      <strong>${r.model}</strong>
+      <div class="muted">User: ${r.user} • UID: ${r.uid}</div>
+      <div class="tiny muted">${r.firstName} ${r.lastName} • ${new Date(r.createdAt).toLocaleString()}</div>
+      <div class="muted">Status: <strong>${r.status}</strong></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <button class="accept" data-id="${r.id}">Accept</button>
+      <button class="reject" data-id="${r.id}">Reject</button>
+    </div>`;
+    devRequestsEl.appendChild(el);
+  });
+
+  // handlers
+  devRequestsEl.querySelectorAll('.accept').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const id = b.getAttribute('data-id');
+      handleAcceptRequest(id);
+    });
+  });
+  devRequestsEl.querySelectorAll('.reject').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const id = b.getAttribute('data-id');
+      handleRejectRequest(id);
+    });
+  });
+}
+
+function handleAcceptRequest(id){
+  const reqs = lsGet('ff_requests', []);
+  const r = reqs.find(x=>x.id===id);
+  if(!r) return alert('Request not found');
+  r.status = 'accepted';
+  lsSet('ff_requests', reqs);
+
+  // set user's approved flag and approvedSensi preset
+  const users = lsGet('ff_users', {});
+  const u = users[r.user] || { pass:'', approved:false, approvedSensi:null };
+  // find preset by model or default
+  const preset = DATA.sensiPresets[r.model] || DATA.sensiPresets['default'];
+  u.approved = true;
+  u.approvedSensi = { Model: r.model, Company: r.company, ...preset };
+  users[r.user] = u;
+  lsSet('ff_users', users);
+
+  alert('Request accepted and sensitivity assigned for ' + r.user);
+  renderDevRequests();
+}
+
+function handleRejectRequest(id){
+  const reqs = lsGet('ff_requests', []);
+  const r = reqs.find(x=>x.id===id);
+  if(!r) return alert('Request not found');
+  r.status = 'rejected';
+  lsSet('ff_requests', reqs);
+  alert('Request rejected');
+  renderDevRequests();
+}
+
+/* ======= Initialization ======= */
+function init(){
+  showLogin();
+  // prefill companies list for later but do not show
+  // wire default UI
+  document.getElementById('openSensi').addEventListener('click', ()=>{ /* already bound */ });
+  // set up simple keyboard shortcut for dev login (hidden) - not shown on login UI
+  window.addEventListener('keydown', (e)=> {
+    // Ctrl+Shift+D opens a prompt for developer login (makes it accessible but not visible)
+    if(e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd'){
+      const code = prompt('Developer code: (leave blank to cancel)');
+      if(!code) return;
+      if(code === 'FF999'){
+        const pass = prompt('Password:');
+        if(pass === 'FF999'){
+          currentUser = { username: 'FF999', role: 'dev' };
+          showDev();
+        } else alert('Wrong password');
+      } else alert('Invalid code');
+    }
+  });
+}
+
+init();
+
+/* keep UI reactive if user refreshes */
+window.addEventListener('storage', ()=>{
+  if(currentUser && currentUser.role === 'dev') renderDevRequests();
+  if(currentUser && currentUser.role === 'user') { renderUserRequests(); renderSensiIfApproved(); renderCart(); }
+});
+
+/* On first view, attach handlers for views showing/hiding */
+document.getElementById('openSensi').addEventListener('click', ()=>{
+  postSensiArea.classList.remove('hidden');
+});
+init();
+</script>
+</body>
+</html>
